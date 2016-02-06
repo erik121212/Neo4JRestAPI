@@ -1,0 +1,61 @@
+MATCH (n) RETURN (n)
+
+MATCH (n) DETACH DELETE n
+
+
+MERGE (c1:Customer {lastname : 'Jansen', rgbnummer : 671234, gender : 'M'})
+MERGE (c2:Customer {lastname : 'Jansen-de Vries', rgbnummer : 675678, gender : 'V'})
+MERGE (c3:Customer {lastname : 'Jansen', rgbnummer : 674444, gender : 'M'})
+MERGE (a1:Account {type: 'EN/OF Betaalrekening', reknr : 'NL93 INGB 0006 1234 56'})
+MERGE (a2:Account {type: 'Spaarrekning', reknr : 'NL93 INGB 0008 6678 56'})
+MERGE (a3:Account {type: 'Kinderrekening', reknr : 'NL92 INGB 0005 7778 51'})
+MERGE (a4:Account {type: 'Zakelijke betaalrekening', reknr : 'NL14 INGB 0001 2278 96'})
+MERGE (comp:Company {name: 'Gamma', clpnummer : 123456})
+MERGE (comp)-[:Accountholder]->(a4)
+MERGE (c1)-[ca1:Accountholder]->(a1)
+MERGE (c1)-[ca3:Accountholder]->(a2)
+MERGE (c1)-[ca4:Gemachtigde]->(a4)
+MERGE (c2)-[ca2:Accountholder]->(a1)
+MERGE (c3)-[ca5:Accountholder]->(a3)
+MERGE (c2)-[ca6:Represents]->(c3)
+RETURN a1, a2, a3, a4, c1, c2, c3, comp
+
+CREATE INDEX ON :Customer(rgbnummer)
+CREATE INDEX ON :Company(clpnummer)
+MATCH (c:Customer {clpnummer:123456}) RETURN c
+MATCH (c:Company {clpnummer:123456}) RETURN (c)
+
+
+// http://neo4j.com/docs/stable/rest-api-transactional.html#rest-api-execute-multiple-statements
+
+// Creating 2 customers and 4 means
+CREATE (p:Klant {name:'Paul'}), (e:Klant {name:'Erik'}), (mi:Means {name:'MijnING'}),(mp:Means {name:'MobilePIN'}),(v:Means {name:'Voice'}),(t:Means {name:'TAN'})
+
+
+// Return all customers if they are linked
+MATCH (klanten: Klant) --> (w) RETURN klanten, w
+
+// Return all customers (whether linked or not)
+MATCH (klanten: Klant) RETURN klanten
+
+// Return all means
+MATCH (means: Means) RETURN means
+
+
+// Return the Ming and Mobile means
+MATCH (mi:Means), (mp:Means)
+WHERE mi.name = 'MijnING' and mp.name = 'MobilePIN'
+RETURN mi, mp
+
+// Link the customer 'Erik' to the means 'MobilePIN ***RUN THIS ONLY ONCE: CREATE=UPDATE***
+MATCH (e:Klant), (mp:Means), (v:Means)
+WHERE e.name = 'Erik' AND mp.name = 'MobilePIN' AND v.name = 'Voice'
+MERGE (e) -[:IsEntitledTo {since: '01-01-2015'}]-> (mp)
+MERGE (e) -[:IsEntitledTo {since: '01-01-2015'}]-> (v)
+
+
+// Link the customer 'Erik' to the means 'MobilePIN ***MERGE=UPSERT***
+MATCH (e:Klant), (mp:Means)
+WHERE e.name = 'Paul' AND mp.name = 'Voice'
+MERGE (e) -[:IsEntitledTo {since: '01-01-2015'}]-> (mp)
+
