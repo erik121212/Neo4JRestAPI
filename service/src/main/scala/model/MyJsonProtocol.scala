@@ -3,10 +3,15 @@ package model
 import spray.json
 import spray.json._
 
+
 /**
   * Created by Erik de Nooij on 8-2-2016.
   */
 trait MyJsonProtocol extends json.DefaultJsonProtocol {
+  implicit val uriStringFormat = jsonFormat3(API)
+  implicit val APIToCypherQueriesMappingFormat = jsonFormat2(APIToCypherQueriesMapping)
+  implicit val neo4jConfigFormat = jsonFormat1(Neo4jConfig)
+
   implicit val neo4JRowFormat = jsonFormat1(Neo4JRow)
   implicit val columnsAndDataFormat = jsonFormat2(ColumnsAndData)
   implicit val neo4JResponseFormat = jsonFormat2(Neo4JResponse)
@@ -23,6 +28,7 @@ trait MyJsonProtocol extends json.DefaultJsonProtocol {
       case JsString(s) => s
       case JsTrue => true
       case JsFalse => false
+      case _ => ""
     }
   }
 }

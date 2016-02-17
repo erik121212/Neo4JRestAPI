@@ -2,21 +2,16 @@ package actors
 
 import akka.actor._
 import akka.http.scaladsl.model.HttpRequest
+import model.{ResponseData, Neo4jConfig}
 
 
-
-object Neo4jActor {
-  def props: Props = Props[Neo4jActor]
-  //def props(senderActorRef: ActorRef): Props = Props[Neo4jActor]
-}
-
-//class Neo4jActor(senderActorRef: ActorRef) extends Actor with Neo4jHelper with ActorLogging {
-class Neo4jActor extends Actor with Neo4jHelper with ActorLogging {
+case class Neo4jActor(neo4jConfig: Neo4jConfig) extends Actor with Neo4jHelper with ActorLogging {
 
   override def receive: Receive = {
 
     case request: HttpRequest =>
-      sender ! requestToNeo4jResponse(request.method, request.uri.path.tail.toString())
+//      sender ! requestToNeo4jResponse(request.method, request.uri.path.tail.toString())
+      sender ! requestToNeo4jResponse(request, neo4jConfig)
 
     // Unknown_message
     case unknown_message =>
