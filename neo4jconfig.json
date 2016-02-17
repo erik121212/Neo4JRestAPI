@@ -1,0 +1,84 @@
+{
+  "APIToCypherQueriesMapping": [
+        {
+          "api": {
+            "httpMethod": "GET",
+            "uriString": "customers\\$PARAM1",
+            "headers": []
+          },
+          "cypherQuery": "\"MATCH (cstmrs:Customer {rgbnummer:{rgbnummer}}) RETURN cstmrs\",\"parameters\" : {\"rgbnummer\" : $PARAM1}"
+        },
+    {
+      "api": {
+        "httpMethod": "POST",
+        "uriString": "customers\\$PARAM1",
+        "headers": []
+      },
+      "cypherQuery": "\"CREATE (cstmrs:Customer {rgbnummer:{rgbnummer}}) RETURN cstmrs\",\"parameters\" : {\"rgbnummer\" : $PARAM1}"
+    },
+    {
+      "api": {
+        "httpMethod": "DELETE",
+        "uriString": "customers\\$PARAM1",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (cstmrs:Customer {rgbnummer:{rgbnummer}}) DETACH DELETE cstmrs\",\"parameters\" : {\"rgbnummer\" : $PARAM1}"
+    },
+    {
+      "api": {
+        "httpMethod": "GET",
+        "uriString": "customers\\$PARAM1\\accounts",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (cstmrs:Customer {rgbnummer:{rgbnummer}}) -[:Accountholder]->(accnts) RETURN cstmrs,accnts\",\"parameters\" : {\"rgbnummer\" : $PARAM1}"
+    },
+    {
+      "api": {
+        "httpMethod": "GET",
+        "uriString": "company\\$PARAM1",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (cmpny:Company {clpnummer:{clpnummer}}) RETURN cmpny\",\"parameters\" : {\"clpnummer\" : $PARAM1}"
+    },
+    {
+      "api": {
+        "httpMethod": "GET",
+        "uriString": "company\\$PARAM1\\accounts",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (cmpny:Company {clpnummer:{clpnummer}}) -[:Accountholder]->(accnts) RETURN cmpny,accnts\",\"parameters\" : {\"clpnummer\" : $PARAM1}"
+    },
+    {
+      "api": {
+        "httpMethod": "GET",
+        "uriString": "address\\$PARAM1",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (addrss:Address {name:{name}}) RETURN addrss\",\"parameters\" : {\"name\" : \" $PARAM1\"}"
+    },
+    {
+      "api": {
+        "httpMethod": "GET",
+        "uriString": "address\\$PARAM1\\customers",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (addrss:Address {name:{name}}) <-[:Woont]-(cstmrs:Customer) RETURN addrss,cstmrs\",\"parameters\" : {\"name\" : \" $PARAM1\"}"
+    },
+    {
+      "api": {
+        "httpMethod": "GET",
+        "uriString": "address\\$PARAM1\\customers\\accounts",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (addrss:Address {name:{name}}) <-[:Woont]-(cstmrs:Customer) -[:Accountholder]-> (accnt:Account)  RETURN addrss,cstmrs,accnt\",\"parameters\" : {\"name\" : \" $PARAM1\"}"
+    },
+    {
+      "api": {
+        "httpMethod": "GET",
+        "uriString": "address\\$PARAM1\\customers\\accounts\\$PARAM2",
+        "headers": []
+      },
+      "cypherQuery": "\"MATCH (addrss:Address {name:{name}}) <-[:Woont]-(cstmrs:Customer) -[:Accountholder]-> (accnt:Account {reknr : {reknr}})  RETURN addrss,cstmrs,accnt\",\"parameters\" : {\"name\" : \" $PARAM1\", \"reknr\" : \" $PARAM2\"}"
+    }
+  ]
+}

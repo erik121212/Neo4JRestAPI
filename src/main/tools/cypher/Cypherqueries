@@ -6,11 +6,12 @@ MATCH (n) DETACH DELETE n
 MERGE (c1:Customer {lastname : 'Jansen', rgbnummer : 671234, gender : 'M'})
 MERGE (c2:Customer {lastname : 'Jansen-de Vries', rgbnummer : 675678, gender : 'V'})
 MERGE (c3:Customer {lastname : 'Jansen', rgbnummer : 674444, gender : 'M'})
-MERGE (a1:Account {type: 'EN/OF Betaalrekening', reknr : 'NL93 INGB 0006 1234 56'})
-MERGE (a2:Account {type: 'Spaarrekning', reknr : 'NL93 INGB 0008 6678 56'})
-MERGE (a3:Account {type: 'Kinderrekening', reknr : 'NL92 INGB 0005 7778 51'})
+MERGE (a1:Account {type: 'EN/OF Betaalrekening', reknr : 'NL93INGB0006123456'})
+MERGE (a2:Account {type: 'Spaarrekning', reknr : 'NL93INGB0008667856'})
+MERGE (a3:Account {type: 'Kinderrekening', reknr : 'NL92INGB0005777851'})
 MERGE (a4:Account {type: 'Zakelijke betaalrekening', reknr : 'NL14 INGB 0001 2278 96'})
 MERGE (comp:Company {name: 'Gamma', clpnummer : 123456})
+MERGE (address:Address {name : '1234AB2a', street : 'Haarlemmerweg', number: 2, city : 'Amsterdam'})
 MERGE (comp)-[:Accountholder]->(a4)
 MERGE (c1)-[ca1:Accountholder]->(a1)
 MERGE (c1)-[ca3:Accountholder]->(a2)
@@ -18,7 +19,19 @@ MERGE (c1)-[ca4:Gemachtigde]->(a4)
 MERGE (c2)-[ca2:Accountholder]->(a1)
 MERGE (c3)-[ca5:Accountholder]->(a3)
 MERGE (c2)-[ca6:Represents]->(c3)
-RETURN a1, a2, a3, a4, c1, c2, c3, comp
+MERGE (c1) -[:Woont]-> (address)
+MERGE (c2) -[:Woont]-> (address)
+MERGE (c3) -[:Woont]-> (address)
+RETURN a1, a2, a3, a4, c1, c2, c3, comp, address
 
 CREATE INDEX ON :Customer(rgbnummer)
 CREATE INDEX ON :Company(clpnummer)
+CREATE INDEX ON :Address(name)
+
+
+LOAD CSV WITH HEADERS FROM "file:///temp\\products.csv" AS row
+CREATE (n:Product)
+SET n = row,
+  n.unitPrice = toFloat(row.unitPrice),
+  n.unitsInStock = toInt(row.unitsInStock), n.unitsOnOrder = toInt(row.unitsOnOrder),
+  n.reorderLevel = toInt(row.reorderLevel), n.discontinued = (row.discontinued <> "0")
