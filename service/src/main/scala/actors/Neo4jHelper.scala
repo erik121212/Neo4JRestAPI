@@ -2,8 +2,17 @@ package actors
 
 import java.io.Serializable
 
-import akka.http.scaladsl.model.{StatusCodes, HttpRequest}
+import akka.actor.ActorRef
+import akka.http.scaladsl.model.{HttpMethod, HttpRequest, StatusCodes}
+import com.ing.api.toolkit.http.ClientFactory
+import com.ing.api.toolkit.http.japi.RichHttpRequestBuilder
+import com.ing.api.toolkit.integration.discovery.StaticResolver
+import com.twitter.finagle.{Http, http, Service}
+import com.twitter.finagle.http.{Response, Request}
+import com.twitter.util.{Future, Duration, Await}
 
+//import com.twitter.finagle.http.Request
+//import com.twitter.finagle.{Service, http}
 import model._
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ByteArrayEntity
@@ -27,6 +36,39 @@ trait Neo4jHelper {
     val entity = new ByteArrayEntity(neo4jRequestPayload.getBytes("UTF-8"))
     entity
   }
+
+  //  def neo4jStatementToNeo4jRequestPayload2(neo4jStatement: Serializable, neo4jRequest: Request, neo4jClient: Service[http.Request, http.Response]) = {
+  //
+  //
+  //    val response = neo4jClient(neo4jRequest)
+  //
+  //    val z= for (r <- response) yield ResponseData(200, "iets")
+  //    z
+  ////    val x = response onSuccess { reply => // when the future gets "filled", use its value
+  ////      ResponseData(200, reply.getContentString())
+  ////    }
+  ////    x
+  //
+  //    //      response.onSuccess { resp: http.Response =>
+  //    //        println("POST success with contentType: " + resp.contentType)
+  //    //        val r = resp.encodeString()
+  //    //
+  //    //        println("encodedString: "+ resp.getContentString())
+  //    //
+  //    //        println("")
+  //    //      }
+  //
+  //    //import com.twitter.finagle.http
+  //    //    import com.twitter.util.{Await, Future}
+  //    //
+  //    //      response.onSuccess { resp: http.Response =>
+  //    //        println("GET success: " + resp)
+  //    //      }
+  //    //      val z: Future[Response] = Await.ready(response)
+  //    //
+  //    //
+  //    //    "doei"
+  //  }
 
 
   /*
@@ -184,6 +226,10 @@ trait Neo4jHelper {
     responseData
   }
 
+  def neo4jRequestPayloadToResponse2(neo4jRequestPayload: String): ResponseData = {
+    ResponseData(200, neo4jRequestPayload)
+  }
+
 
   /*
   * Helper function that converts a HttpRequest into the corresponding Cypher query statement or None if the url is not valid
@@ -208,7 +254,7 @@ trait Neo4jHelper {
 
 
   /*
-  * Function that returns ResponseData  based on a HttpRequest
+  * Function that returns ResponseData based on a HttpRequest
   *
   * @Param request: the HttpRequest
   * @Param neo4jConfig: the configuration of all mappings
@@ -218,7 +264,7 @@ trait Neo4jHelper {
 
     val neo4jResponse = urlToCypherStatement(request, neo4jConfig) match {
       case Some(someNeo4jStatement) => {
-        println(someNeo4jStatement)
+        //println(someNeo4jStatement)
         val neo4jRequestPayload = neo4jStatementToNeo4jRequestPayload(someNeo4jStatement)
         neo4jRequestPayloadToResponse(request.method.value, neo4jRequestPayload)
       }
@@ -226,6 +272,41 @@ trait Neo4jHelper {
     }
     neo4jResponse
   }
+
+  /*
+ * Function that returns ResponseData based on a HttpRequest
+ *
+ * @Param request: the HttpRequest
+ * @Param neo4jConfig: the configuration of all mappings
+ *
+ */
+  def eventualNeo4jResponse(theSender: ActorRef, request: HttpRequest, neo4jConfig: Neo4jConfig, neo4jRequest : Request, client : Service[http.Request, http.Response]) = {
+    //theSender ! ResponseData(200, "test finagle")
+
+
+    val neo4jResponse = urlToCypherStatement(request, neo4jConfig) match {
+      case Some(someNeo4jStatement) => {
+        println(someNeo4jStatement)
+        val neo4jRequestPayload = s"""{ "statements" : [ {  "statement" : ${someNeo4jStatement} } ]}"""
+        //        val neo4jRequestPayload = neo4jStatementToNeo4jRequestPayload(someNeo4jStatement)
+        //        neo4jRequestPayloadToResponse(request.method.value, neo4jRequestPayload)
+        neo4jRequest.setContentString(neo4jRequestPayload)
+
+        val response: Future[http.Response] = client(neo4jRequest)
+        response.onSuccess { resp: http.Response =>
+          val r = resp.encodeString()
+          theSender ! ResponseData(200, r)
+        }
+        response.onFailure {
+          e => println("Following exception occurred" + e.toString())
+            theSender ! ResponseData(500, e.toString())
+        }
+      }
+      case None => theSender ! ResponseData(404, "Nada")
+    }
+    neo4jResponse
+  }
+
 
 
 }

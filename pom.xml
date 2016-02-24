@@ -19,6 +19,16 @@
             <!--<artifactId>finagle-httpx_2.11</artifactId>-->
             <!--<version>6.29.0</version>-->
         <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.ing.api.toolkit</groupId>-->
+            <!--<artifactId>toolkit-http</artifactId>-->
+            <!--<version>1.1.1</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>com.ing.api.toolkit</groupId>
+            <artifactId>toolkit-http</artifactId>
+            <version>1.1.1</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -44,6 +54,14 @@
             <artifactId>akka-actor_2.11</artifactId>
             <version>2.4.1</version>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.typesafe.akka</groupId>-->
+            <!--<artifactId>akka-remote_2.11</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.typesafe.akka</groupId>-->
+            <!--<artifactId>akka-kernel_2.11</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-http-experimental_2.11</artifactId>

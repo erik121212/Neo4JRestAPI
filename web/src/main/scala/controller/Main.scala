@@ -22,7 +22,7 @@ object Main extends Config {
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val timeout = Timeout(20.seconds)
+  implicit val timeout = Timeout(5.seconds)
 
 
   def main(args: Array[String]) {
@@ -32,7 +32,7 @@ object Main extends Config {
     */
     val neo4jConfig = Model.parseConfigFile(args)
 
-    val neo4jRouter: ActorRef = system.actorOf(RoundRobinPool(10).props(Props (new Neo4jActor(neo4jConfig))), "neo4jRouter")
+    val neo4jRouter: ActorRef = system.actorOf(RoundRobinPool(1).props(Props (new Neo4jActor(neo4jConfig))), "neo4jRouter")
 
 
     val route: Route = {
